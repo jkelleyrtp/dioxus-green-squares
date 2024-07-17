@@ -24,17 +24,14 @@ impl VNode {
         // If hot reloading is enabled, we need to make sure we're using the latest template
         #[cfg(debug_assertions)]
         {
-            let (path, byte_index) = new.template.get().name.rsplit_once(':').unwrap();
-            if let Some(map) = dom.templates.get(path) {
-                let byte_index = byte_index.parse::<usize>().unwrap();
-                if let Some(&template) = map.get(&byte_index) {
-                    new.template.set(template);
-                    if template != self.template.get() {
-                        let mount_id = self.mount.get();
-                        let parent = dom.mounts[mount_id.0].parent;
-                        self.replace(std::slice::from_ref(new), parent, dom, to);
-                        return;
-                    }
+            let name = new.template.get().name;
+            if let Some(template) = dom.templates.get(name).cloned() {
+                new.template.set(template);
+                if template != self.template.get() {
+                    let mount_id = self.mount.get();
+                    let parent = dom.mounts[mount_id.0].parent;
+                    self.replace(std::slice::from_ref(new), parent, dom, to);
+                    return;
                 }
             }
         }
@@ -576,12 +573,7 @@ impl VNode {
         #[cfg(debug_assertions)]
         {
             let template = self.template.get();
-            let (path, byte_index) = template.name.rsplit_once(':').unwrap();
-            if let Some(new_template) = dom
-                .templates
-                .get(path)
-                .and_then(|map| map.get(&byte_index.parse().unwrap()))
-            {
+            if let Some(new_template) = dom.templates.get(template.name) {
                 self.template.set(*new_template);
             }
         };

@@ -385,7 +385,7 @@ pub struct Template {
 }
 
 #[cfg(feature = "serialize")]
-fn deserialize_string_leaky<'a, 'de, D>(deserializer: D) -> Result<&'a str, D::Error>
+pub(crate) fn deserialize_string_leaky<'a, 'de, D>(deserializer: D) -> Result<&'a str, D::Error>
 where
     D: serde::Deserializer<'de>,
 {
@@ -1076,15 +1076,31 @@ impl IntoAttributeValue for String {
     }
 }
 
+impl IntoAttributeValue for f32 {
+    fn into_value(self) -> AttributeValue {
+        AttributeValue::Float(self as _)
+    }
+}
 impl IntoAttributeValue for f64 {
     fn into_value(self) -> AttributeValue {
         AttributeValue::Float(self)
     }
 }
 
+impl IntoAttributeValue for i32 {
+    fn into_value(self) -> AttributeValue {
+        AttributeValue::Int(self as _)
+    }
+}
 impl IntoAttributeValue for i64 {
     fn into_value(self) -> AttributeValue {
         AttributeValue::Int(self)
+    }
+}
+
+impl IntoAttributeValue for i128 {
+    fn into_value(self) -> AttributeValue {
+        AttributeValue::Int(self as _)
     }
 }
 
